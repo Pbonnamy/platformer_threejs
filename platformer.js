@@ -6,6 +6,7 @@ window.addEventListener('keydown', onKeyDown, false);
 
 let cube, plane;
 let scene, camera, renderer, controls;
+let ambientLight, pointLight;
 
 main();
 
@@ -14,6 +15,7 @@ function main()
     init();
     createCube();
     createPlane();
+    addLight();
 
     animate();
 }
@@ -29,15 +31,18 @@ function onWindowResize()
 function init() 
 {
     scene = new THREE.Scene();
+    scene.background = new THREE.Color( 0x87ceeb );
+
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-    renderer = new THREE.WebGLRenderer();
-
-    controls = new OrbitControls( camera, renderer.domElement );
-
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
     camera.position.z = 5;
     camera.position.y = 2.5;
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild( renderer.domElement );
+
+    controls = new OrbitControls( camera, renderer.domElement );
 }   
 
 function animate() {
@@ -49,8 +54,9 @@ function animate() {
 function createCube() 
 {
     const geometry = new THREE.BoxGeometry(1, 1);
-    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    const material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
     cube = new THREE.Mesh( geometry, material );
+    cube.castShadow = true;
     cube.position.y = 0.5;
     scene.add( cube );
 }
@@ -58,8 +64,9 @@ function createCube()
 function createPlane() 
 {
     const geometry = new THREE.PlaneGeometry( 500, 500 );
-    const material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+    const material = new THREE.MeshPhongMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
     const plane = new THREE.Mesh( geometry, material );
+    plane.receiveShadow = true;
     plane.rotation.x = Math.PI / 2;
 
     scene.add( plane );
@@ -81,6 +88,16 @@ function onKeyDown(event) {
             cube.position.x += speed;
             break;
     }
+}
+
+function addLight() {
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    pointLight = new THREE.PointLight(0xffffff, 10);
+    scene.add(pointLight);
+    pointLight.position.set(1, 3, 0);
+    pointLight.castShadow = true;
 }
 
 
