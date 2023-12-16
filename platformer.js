@@ -1,12 +1,11 @@
 import * as THREE from 'three';
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const renderer = new THREE.WebGLRenderer();
+import { OrbitControls} from 'three/addons/controls/OrbitControls.js';
 
 window.addEventListener('resize', onWindowResize, false);
+window.addEventListener('keydown', onKeyDown, false);
 
-let cube;
+let cube, plane;
+let scene, camera, renderer, controls;
 
 main();
 
@@ -14,6 +13,9 @@ function main()
 {
     init();
     createCube();
+    createPlane();
+
+    animate();
 }
 
 function onWindowResize() 
@@ -26,26 +28,60 @@ function onWindowResize()
 
 function init() 
 {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    renderer = new THREE.WebGLRenderer();
+
+    controls = new OrbitControls( camera, renderer.domElement );
+
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
     camera.position.z = 5;
+    camera.position.y = 2.5;
 }   
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
 
 function createCube() 
 {
-    const geometry = new THREE.BoxGeometry();
+    const geometry = new THREE.BoxGeometry(1, 1);
     const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     cube = new THREE.Mesh( geometry, material );
+    cube.position.y = 0.5;
     scene.add( cube );
-
-    animateCube();
 }
 
-function animateCube()
+function createPlane() 
 {
-    requestAnimationFrame( animateCube );
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
+    const geometry = new THREE.PlaneGeometry( 500, 500 );
+    const material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+    const plane = new THREE.Mesh( geometry, material );
+    plane.rotation.x = Math.PI / 2;
 
-    renderer.render( scene, camera );
+    scene.add( plane );
 }
+
+function onKeyDown(event) {
+    const speed = 0.1;
+    switch (event.key) {
+        case 'z':
+            cube.position.z -= speed;
+            break;
+        case 's':
+            cube.position.z += speed;
+            break;
+        case 'q':
+            cube.position.x -= speed;
+            break;
+        case 'd':
+            cube.position.x += speed;
+            break;
+    }
+}
+
+
+
