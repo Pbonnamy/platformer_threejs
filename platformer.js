@@ -4,9 +4,14 @@ import { OrbitControls} from 'three/addons/controls/OrbitControls.js';
 window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('keydown', onKeyDown, false);
 
+const INITIAL_JUMP_STRENGHT = 0.3;
+
 let cube, plane;
 let scene, camera, renderer, controls;
 let ambientLight, pointLight;
+let isJumping = false;
+let jumpStrength = INITIAL_JUMP_STRENGHT;
+let gravityStrength = 0.02;
 
 main();
 
@@ -48,6 +53,11 @@ function init()
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
+
+    if (isJumping) {
+        cubeJump();
+    }
+
     renderer.render(scene, camera);
 }
 
@@ -87,6 +97,22 @@ function onKeyDown(event) {
         case 'd':
             cube.position.x += speed;
             break;
+        case ' ':
+            if (!isJumping) {
+                isJumping = true;
+            } 
+            break;
+    }
+}
+
+function cubeJump() {
+    cube.position.y += jumpStrength;
+    jumpStrength -= gravityStrength;
+
+    if (cube.position.y <= 0.5) {
+        isJumping = false;
+        cube.position.y = 0.5;
+        jumpStrength = INITIAL_JUMP_STRENGHT;
     }
 }
 
