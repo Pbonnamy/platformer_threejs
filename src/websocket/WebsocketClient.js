@@ -1,4 +1,5 @@
 import {authorize, createSession, queryHeadsets, requestAccess, subscribe} from "./WebsocketRequests";
+import {onEventReceived} from "../platformer";
 
 export class WebsocketClient {
     constructor() {
@@ -9,7 +10,6 @@ export class WebsocketClient {
         this.connect('wss://localhost:6868');
     }
 
-    //websocket connect
     connect(url) {
         this.socket = new WebSocket(url);
         this.socket.onopen = async () => {
@@ -42,6 +42,17 @@ export class WebsocketClient {
         })
     }
 
+    handleSubscribedData() {
+        this.socket.onmessage = (event) => {
+            const command = JSON.parse(event.data);
+            console.log('websocket message: ', command);
+            if (command.com) {
+                const commandName = command.com[0];
+                onEventReceived(commandName);
+            }
+        }
+    }
+
     async retrieveMentalCommand() {
         const resHeadset = await this.send(queryHeadsets);
         this.headSet = resHeadset.result[0].id;
@@ -50,5 +61,6 @@ export class WebsocketClient {
         this.session = resSession.result.id;
 
         await this.send(subscribe(this.token, this.session, ['com']));
+        this.handleSubscribedData();
     }
 }

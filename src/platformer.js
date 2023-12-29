@@ -3,6 +3,7 @@ import { OrbitControls} from 'three/addons/controls/OrbitControls.js';
 
 window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('keydown', onKeyDown, false);
+import {WebsocketClient} from './websocket/WebsocketClient.js';
 
 const INITIAL_JUMP_STRENGHT = 0.3;
 
@@ -17,10 +18,13 @@ main();
 
 function main() 
 {
+
     init();
     createCube();
     createPlane();
     addLight();
+
+    new WebsocketClient();
 
     animate();
 }
@@ -105,6 +109,29 @@ function onKeyDown(event) {
     }
 }
 
+export function onEventReceived(event) {
+    const speed = 0.1;
+    switch (event) {
+        case 'push':
+            cube.position.z -= speed;
+            break;
+        case 'pull':
+            cube.position.z += speed;
+            break;
+        case 'left':
+            cube.position.x -= speed;
+            break;
+        case 'right':
+            cube.position.x += speed;
+            break;
+        case 'lift':
+            if (!isJumping) {
+                isJumping = true;
+            }
+            break;
+    }
+}
+
 function cubeJump() {
     cube.position.y += jumpStrength;
     jumpStrength -= gravityStrength;
@@ -125,6 +152,3 @@ function addLight() {
     pointLight.position.set(1, 3, 0);
     pointLight.castShadow = true;
 }
-
-
-
