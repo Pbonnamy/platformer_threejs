@@ -2,7 +2,7 @@
   "name": "platformer",
   "version": "1.0.0",
   "description": "",
-  "main": "platformer.js",
+  "main": "src/platformer.js",
   "scripts": {
     "dev": "vite"
   },
