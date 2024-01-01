@@ -157,22 +157,22 @@ function onKeyDown(event) {
     checkPlayerCollision();
 }
 
-export function onEventReceived(event) {
+export function onEventReceived(event, intensity) {
     switch (event) {
         case 'push':
-            player.position.z -= PLAYER_SPEED;
+            player.position.z -= intensity;
             player.rotation.y = Math.PI;
             break;
         case 'pull':
-            player.position.z += PLAYER_SPEED;
+            player.position.z += intensity;
             player.rotation.y = 0;
             break;
         case 'left':
-            player.position.x -= PLAYER_SPEED;
+            player.position.x -= intensity;
             player.rotation.y = -Math.PI / 2;
             break;
         case 'right':
-            player.position.x += PLAYER_SPEED;
+            player.position.x += intensity;
             player.rotation.y = Math.PI / 2;
             break;
         case 'lift':
@@ -182,6 +182,8 @@ export function onEventReceived(event) {
             }
             break;
     }
+
+    checkPlayerCollision();
 }
 
 function playerJump() {

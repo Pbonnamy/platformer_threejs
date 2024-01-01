@@ -48,7 +48,8 @@ export class WebsocketClient {
             console.log('websocket message: ', command);
             if (command.com) {
                 const commandName = command.com[0];
-                onEventReceived(commandName);
+                const intensity = command.com[1];
+                onEventReceived(commandName, intensity);
             }
         }
     }
