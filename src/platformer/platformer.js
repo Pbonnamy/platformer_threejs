@@ -1,18 +1,20 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('keydown', onKeyDown, false);
 
-const INITIAL_JUMP_STRENGHT = 0.3;
+const INITIAL_JUMP_STRENGTH = 0.3;
+const INITAL_PLAYER_Y = 1.6;
 const PLATFORM_SIZE = 6;
-const CUBE_SPEED = 0.5;
+const PLAYER_SPEED = 0.5;
 
-let cube, plane;
+let player, plane;
 let scene, camera, renderer, controls;
 let ambientLight, pointLight;
 let isJumping = false;
-let jumpStrength = INITIAL_JUMP_STRENGHT;
+let jumpStrength = INITIAL_JUMP_STRENGTH;
 let gravityStrength = 0.02;
 
 const platforms = [
@@ -40,7 +42,7 @@ const platforms = [
 
 export function main() {
     init();
-    createCube();
+    createPlayer();
     createPlane();
     createPlatforms();
     addLight();
@@ -73,21 +75,32 @@ function animate() {
     controls.update();
 
     if (isJumping) {
-        cubeJump();
+        playerJump();
     }
 
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
 }
 
-function createCube() {
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({color: 0x00ff00});
-    cube = new THREE.Mesh(geometry, material);
-    cube.geometry.computeBoundingBox();
-    cube.castShadow = true;
-    cube.position.y = 0.5;
-    scene.add(cube);
+function createPlayer() {
+    const loader = new GLTFLoader();
+    loader.load('src/assets/steve.glb', function (gltf) {
+        player = gltf.scene;
+        gltf.scene.traverse(function (child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+
+        player.position.y = INITAL_PLAYER_Y;
+        player.rotation.y = Math.PI;
+        player.scale.set(0.1, 0.1, 0.1);
+
+        scene.add(player);
+    }, undefined, function (error) {
+        console.error(error);
+    });
 }
 
 function createPlane() {
@@ -110,16 +123,20 @@ function createPlane() {
 function onKeyDown(event) {
     switch (event.key) {
         case 'z':
-            cube.position.z -= CUBE_SPEED;
+            player.position.z -= PLAYER_SPEED;
+            player.rotation.y = Math.PI;
             break;
         case 's':
-            cube.position.z += CUBE_SPEED;
+            player.position.z += PLAYER_SPEED;
+            player.rotation.y = 0;
             break;
         case 'q':
-            cube.position.x -= CUBE_SPEED;
+            player.position.x -= PLAYER_SPEED;
+            player.rotation.y = -Math.PI / 2;
             break;
         case 'd':
-            cube.position.x += CUBE_SPEED;
+            player.position.x += PLAYER_SPEED;
+            player.rotation.y = Math.PI / 2;
             break;
         case ' ':
             if (!isJumping) {
@@ -132,16 +149,20 @@ function onKeyDown(event) {
 export function onEventReceived(event) {
     switch (event) {
         case 'push':
-            cube.position.z -= CUBE_SPEED;
+            player.position.z -= PLAYER_SPEED;
+            player.rotation.y = Math.PI;
             break;
         case 'pull':
-            cube.position.z += CUBE_SPEED;
+            player.position.z += PLAYER_SPEED;
+            player.rotation.y = 0;
             break;
         case 'left':
-            cube.position.x -= CUBE_SPEED;
+            player.position.x -= PLAYER_SPEED;
+            player.rotation.y = -Math.PI / 2;
             break;
         case 'right':
-            cube.position.x += CUBE_SPEED;
+            player.position.x += PLAYER_SPEED;
+            player.rotation.y = Math.PI / 2;
             break;
         case 'lift':
             if (!isJumping) {
@@ -151,14 +172,14 @@ export function onEventReceived(event) {
     }
 }
 
-function cubeJump() {
-    cube.position.y += jumpStrength;
+function playerJump() {
+    player.position.y += jumpStrength;
     jumpStrength -= gravityStrength;
 
-    if (cube.position.y <= 0.5) {
+    if (player.position.y <= INITAL_PLAYER_Y) {
         isJumping = false;
-        cube.position.y = 0.5;
-        jumpStrength = INITIAL_JUMP_STRENGHT;
+        player.position.y = INITAL_PLAYER_Y;
+        jumpStrength = INITIAL_JUMP_STRENGTH;
     }
 }
 
