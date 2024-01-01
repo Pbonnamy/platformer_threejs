@@ -7,8 +7,9 @@ window.addEventListener('keydown', onKeyDown, false);
 
 const INITIAL_JUMP_STRENGTH = 0.3;
 const INITAL_PLAYER_Y = 1.6;
-const PLATFORM_SIZE = 6;
+const PLATFORM_SIZE = 8;
 const PLAYER_SPEED = 0.5;
+const PLANE_SIZE = 40;
 
 let player, plane;
 let scene, camera, renderer, controls;
@@ -19,23 +20,23 @@ let gravityStrength = 0.02;
 
 const platforms = [
     {
-        x: 0,
-        z: -PLATFORM_SIZE,
+        x: -PLATFORM_SIZE/2,
+        z: PLATFORM_SIZE/2,
         y: -PLATFORM_SIZE/2 + 1,
     },
     {
-        x: PLATFORM_SIZE,
-        z: -PLATFORM_SIZE,
+        x: PLATFORM_SIZE/2,
+        z: PLATFORM_SIZE/2,
         y: -PLATFORM_SIZE/2 + 2,
     },
     {
-        x: PLATFORM_SIZE,
-        z: -PLATFORM_SIZE * 2,
+        x: PLATFORM_SIZE/2,
+        z: -PLATFORM_SIZE/2,
         y: -PLATFORM_SIZE/2 + 3,
     },
     {
-        x: 0,
-        z: -PLATFORM_SIZE * 2,
+        x: -PLATFORM_SIZE/2,
+        z: -PLATFORM_SIZE/2,
         y: -PLATFORM_SIZE/2 + 4,
     }
 ];
@@ -60,8 +61,8 @@ function init() {
     scene.background = new THREE.Color(0x87ceeb);
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
-    camera.position.y = 2.5;
+    camera.position.z = 15;
+    camera.position.y = 10;
 
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -94,7 +95,9 @@ function createPlayer() {
         });
 
         player.position.y = INITAL_PLAYER_Y;
-        player.rotation.y = Math.PI;
+        player.position.x = -12;
+        player.position.z = 4;
+        player.rotation.y = Math.PI / 2;
         player.scale.set(0.1, 0.1, 0.1);
 
         scene.add(player);
@@ -104,7 +107,7 @@ function createPlayer() {
 }
 
 function createPlane() {
-    const geometry = new THREE.PlaneGeometry(30, 30);
+    const geometry = new THREE.PlaneGeometry(PLANE_SIZE, PLANE_SIZE);
     const texture = new THREE.TextureLoader().load('src/assets/water.jpg');
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
