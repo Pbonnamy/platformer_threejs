@@ -6,12 +6,15 @@ window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('keydown', onKeyDown, false);
 
 const INITIAL_JUMP_STRENGTH = 0.3;
-const INITAL_PLAYER_Y = 1.6;
-const PLATFORM_SIZE = 8;
+const PLATFORM_SIZE = 10;
 const PLAYER_SPEED = 0.5;
-const PLANE_SIZE = 40;
+const PLANE_SIZE = 50;
+const INITIAL_PLAYER_Y = 1.6;
+
+const modelLoader = new GLTFLoader();
 
 let player, plane;
+let yBeforeJumping = 0;
 let scene, camera, renderer, controls;
 let ambientLight, pointLight;
 let isJumping = false;
@@ -46,6 +49,8 @@ export function main() {
     createPlayer();
     createPlane();
     createPlatforms();
+    createTrees();
+    createTorches();
     addLight();
     animate();
 }
@@ -84,8 +89,7 @@ function animate() {
 }
 
 function createPlayer() {
-    const loader = new GLTFLoader();
-    loader.load('src/assets/steve.glb', function (gltf) {
+    modelLoader.load('src/assets/model/steve.glb', function (gltf) {
         player = gltf.scene;
         gltf.scene.traverse(function (child) {
             if (child.isMesh) {
@@ -94,7 +98,7 @@ function createPlayer() {
             }
         });
 
-        player.position.y = INITAL_PLAYER_Y;
+        player.position.y = INITIAL_PLAYER_Y;
         player.position.x = -12;
         player.position.z = 4;
         player.rotation.y = Math.PI / 2;
@@ -108,7 +112,7 @@ function createPlayer() {
 
 function createPlane() {
     const geometry = new THREE.PlaneGeometry(PLANE_SIZE, PLANE_SIZE);
-    const texture = new THREE.TextureLoader().load('src/assets/water.jpg');
+    const texture = new THREE.TextureLoader().load('src/assets/texture/water.jpg');
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(5, 5);
@@ -124,6 +128,7 @@ function createPlane() {
 }
 
 function onKeyDown(event) {
+    checkPlayerCollision();
     switch (event.key) {
         case 'z':
             player.position.z -= PLAYER_SPEED;
@@ -143,10 +148,13 @@ function onKeyDown(event) {
             break;
         case ' ':
             if (!isJumping) {
+                yBeforeJumping = player.position.y;
                 isJumping = true;
             }
             break;
     }
+
+    checkPlayerCollision();
 }
 
 export function onEventReceived(event) {
@@ -169,6 +177,7 @@ export function onEventReceived(event) {
             break;
         case 'lift':
             if (!isJumping) {
+                yBeforeJumping = player.position.y;
                 isJumping = true;
             }
             break;
@@ -179,9 +188,9 @@ function playerJump() {
     player.position.y += jumpStrength;
     jumpStrength -= gravityStrength;
 
-    if (player.position.y <= INITAL_PLAYER_Y) {
+    if (player.position.y <= yBeforeJumping) {
         isJumping = false;
-        player.position.y = INITAL_PLAYER_Y;
+        player.position.y = yBeforeJumping;
         jumpStrength = INITIAL_JUMP_STRENGTH;
     }
 }
@@ -190,17 +199,17 @@ function addLight() {
     ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    pointLight = new THREE.PointLight(0xffffff, 100);
+    pointLight = new THREE.PointLight(0xffffff, 500);
     scene.add(pointLight);
-    pointLight.position.set(5, 10, 0);
+    pointLight.position.set(5, 20, 0);
     pointLight.castShadow = true;
 }
 
 function createPlatforms() {
     for (const platform of platforms) {
         const geometry = new THREE.BoxGeometry(PLATFORM_SIZE, PLATFORM_SIZE, PLATFORM_SIZE);
-        const topTexture = new THREE.TextureLoader().load('src/assets/top.png');
-        const sideTexture = new THREE.TextureLoader().load('src/assets/side.png');
+        const topTexture = new THREE.TextureLoader().load('src/assets/texture/top.png');
+        const sideTexture = new THREE.TextureLoader().load('src/assets/texture/side.png');
 
         const material = [
             new THREE.MeshPhongMaterial({map: sideTexture}),
@@ -215,7 +224,65 @@ function createPlatforms() {
         mesh.position.y = platform.y;
         mesh.position.z = platform.z;
         mesh.castShadow = true;
+        mesh.receiveShadow = true;
         platform.object = mesh;
         scene.add(mesh);
     }
+}
+
+function createTrees() {
+    modelLoader.load('src/assets/model/tree.glb', function (gltf) {
+        const tree = gltf.scene;
+        gltf.scene.traverse(function (child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+
+        tree.position.y = -1;
+        tree.position.x = -PLATFORM_SIZE/2-1;
+        tree.position.z = -PLATFORM_SIZE/2;
+        tree.rotation.y = Math.PI / 2;
+        tree.scale.set(10, 10, 10);
+
+        scene.add(tree);
+    }, undefined, function (error) {
+        console.error(error);
+    });
+}
+
+function createTorches() {
+    modelLoader.load('src/assets/model/torch.glb', function (gltf) {
+        const torch = gltf.scene;
+        gltf.scene.traverse(function (child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+
+        torch.position.y = 2.5;
+        torch.position.x = PLATFORM_SIZE/2+2;
+        torch.position.z = PLATFORM_SIZE/2+2;
+        torch.rotation.y = Math.PI / 2;
+
+        scene.add(torch);
+    }, undefined, function (error) {
+        console.error(error);
+    });
+}
+
+function checkPlayerCollision() {
+    for (const platform of platforms) {
+        if (player.position.x >= platform.x - PLATFORM_SIZE / 2
+            && player.position.x <= platform.x + PLATFORM_SIZE / 2
+            && player.position.z >= platform.z - PLATFORM_SIZE / 2
+            && player.position.z <= platform.z + PLATFORM_SIZE / 2) {
+            player.position.y = platform.y + PLATFORM_SIZE / 2 + INITIAL_PLAYER_Y;
+            return;
+        }
+    }
+
+    player.position.y = INITIAL_PLAYER_Y;
 }
