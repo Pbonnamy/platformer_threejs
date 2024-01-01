@@ -64,3 +64,5 @@ export class WebsocketClient {
         this.handleSubscribedData();
     }
 }
+
+new WebsocketClient();

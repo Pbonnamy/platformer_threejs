@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 
 window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('keydown', onKeyDown, false);
-import {WebsocketClient} from './websocket/WebsocketClient.js';
 
 const INITIAL_JUMP_STRENGHT = 0.3;
+const PLATFORM_SIZE = 5;
 
 let cube, plane;
 let scene, camera, renderer, controls;
@@ -14,45 +14,59 @@ let isJumping = false;
 let jumpStrength = INITIAL_JUMP_STRENGHT;
 let gravityStrength = 0.02;
 
-main();
+const platforms = [
+    {
+        height: 1,
+        x: 0,
+        z: -5,
+    },
+    {
+        height: 2,
+        x: 5,
+        z: -5,
+    },
+    {
+        height: 3,
+        x: 5,
+        z: -10,
+    },
+    {
+        height: 4,
+        x: 0,
+        z: -10,
+    }
+];
 
-function main() 
-{
-
+export function main() {
     init();
     createCube();
     createPlane();
+    createPlatforms();
     addLight();
-
-    new WebsocketClient();
-
     animate();
 }
 
-function onWindowResize() 
-{
+function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-
-function init() 
-{
+function init() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0x87ceeb );
+    scene.background = new THREE.Color(0x87ceeb);
 
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 5;
     camera.position.y = 2.5;
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    document.body.appendChild( renderer.domElement );
+    document.body.appendChild(renderer.domElement);
 
-    controls = new OrbitControls( camera, renderer.domElement );
-}   
+    controls = new OrbitControls(camera, renderer.domElement);
+}
 
 function animate() {
     requestAnimationFrame(animate);
@@ -65,25 +79,23 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-function createCube() 
-{
-    const geometry = new THREE.BoxGeometry(1, 1);
-    const material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
-    cube = new THREE.Mesh( geometry, material );
+function createCube() {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshPhongMaterial({color: 0x00ff00});
+    cube = new THREE.Mesh(geometry, material);
     cube.castShadow = true;
     cube.position.y = 0.5;
-    scene.add( cube );
+    scene.add(cube);
 }
 
-function createPlane() 
-{
-    const geometry = new THREE.PlaneGeometry( 500, 500 );
-    const material = new THREE.MeshPhongMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-    const plane = new THREE.Mesh( geometry, material );
+function createPlane() {
+    const geometry = new THREE.PlaneGeometry(500, 500);
+    const material = new THREE.MeshPhongMaterial({color: 0xffff00, side: THREE.DoubleSide});
+    const plane = new THREE.Mesh(geometry, material);
     plane.receiveShadow = true;
     plane.rotation.x = Math.PI / 2;
 
-    scene.add( plane );
+    scene.add(plane);
 }
 
 function onKeyDown(event) {
@@ -104,7 +116,7 @@ function onKeyDown(event) {
         case ' ':
             if (!isJumping) {
                 isJumping = true;
-            } 
+            }
             break;
     }
 }
@@ -151,4 +163,17 @@ function addLight() {
     scene.add(pointLight);
     pointLight.position.set(1, 3, 0);
     pointLight.castShadow = true;
+}
+
+function createPlatforms() {
+    for (const platform of platforms) {
+        const geometry = new THREE.BoxGeometry(PLATFORM_SIZE, platform.height, PLATFORM_SIZE);
+        const material = new THREE.MeshPhongMaterial({color: 0xff0000});
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.x = platform.x
+        mesh.position.y = platform.height / 2;
+        mesh.position.z = platform.z;
+        mesh.castShadow = true;
+        scene.add(mesh);
+    }
 }
