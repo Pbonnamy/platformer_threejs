@@ -1,5 +1,5 @@
 import {authorize, createSession, queryHeadsets, requestAccess, subscribe} from "./WebsocketRequests";
-import {onEventReceived} from "../platformer";
+import {onEventReceived} from "../platformer/platformer";
 
 export class WebsocketClient {
     constructor() {

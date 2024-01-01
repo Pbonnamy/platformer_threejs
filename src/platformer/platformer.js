@@ -6,6 +6,7 @@ window.addEventListener('keydown', onKeyDown, false);
 
 const INITIAL_JUMP_STRENGHT = 0.3;
 const PLATFORM_SIZE = 5;
+const CUBE_SPEED = 0.5;
 
 let cube, plane;
 let scene, camera, renderer, controls;
@@ -18,22 +19,22 @@ const platforms = [
     {
         height: 1,
         x: 0,
-        z: -5,
+        z: -PLATFORM_SIZE,
     },
     {
         height: 2,
-        x: 5,
-        z: -5,
+        x: PLATFORM_SIZE,
+        z: -PLATFORM_SIZE
     },
     {
         height: 3,
-        x: 5,
-        z: -10,
+        x: PLATFORM_SIZE,
+        z: -PLATFORM_SIZE * 2,
     },
     {
         height: 4,
         x: 0,
-        z: -10,
+        z: -PLATFORM_SIZE * 2,
     }
 ];
 
@@ -69,7 +70,6 @@ function init() {
 }
 
 function animate() {
-    requestAnimationFrame(animate);
     controls.update();
 
     if (isJumping) {
@@ -77,20 +77,26 @@ function animate() {
     }
 
     renderer.render(scene, camera);
+    requestAnimationFrame(animate);
 }
 
 function createCube() {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshPhongMaterial({color: 0x00ff00});
     cube = new THREE.Mesh(geometry, material);
+    cube.geometry.computeBoundingBox();
     cube.castShadow = true;
     cube.position.y = 0.5;
     scene.add(cube);
 }
 
 function createPlane() {
-    const geometry = new THREE.PlaneGeometry(500, 500);
-    const material = new THREE.MeshPhongMaterial({color: 0xffff00, side: THREE.DoubleSide});
+    const geometry = new THREE.PlaneGeometry(30, 30);
+    const texture = new THREE.TextureLoader().load('src/assets/water.jpg');
+    const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.DoubleSide,
+    });
     const plane = new THREE.Mesh(geometry, material);
     plane.receiveShadow = true;
     plane.rotation.x = Math.PI / 2;
@@ -99,19 +105,18 @@ function createPlane() {
 }
 
 function onKeyDown(event) {
-    const speed = 0.1;
     switch (event.key) {
         case 'z':
-            cube.position.z -= speed;
+            cube.position.z -= CUBE_SPEED;
             break;
         case 's':
-            cube.position.z += speed;
+            cube.position.z += CUBE_SPEED;
             break;
         case 'q':
-            cube.position.x -= speed;
+            cube.position.x -= CUBE_SPEED;
             break;
         case 'd':
-            cube.position.x += speed;
+            cube.position.x += CUBE_SPEED;
             break;
         case ' ':
             if (!isJumping) {
@@ -122,19 +127,18 @@ function onKeyDown(event) {
 }
 
 export function onEventReceived(event) {
-    const speed = 0.1;
     switch (event) {
         case 'push':
-            cube.position.z -= speed;
+            cube.position.z -= CUBE_SPEED;
             break;
         case 'pull':
-            cube.position.z += speed;
+            cube.position.z += CUBE_SPEED;
             break;
         case 'left':
-            cube.position.x -= speed;
+            cube.position.x -= CUBE_SPEED;
             break;
         case 'right':
-            cube.position.x += speed;
+            cube.position.x += CUBE_SPEED;
             break;
         case 'lift':
             if (!isJumping) {
@@ -174,6 +178,7 @@ function createPlatforms() {
         mesh.position.y = platform.height / 2;
         mesh.position.z = platform.z;
         mesh.castShadow = true;
+        platform.object = mesh;
         scene.add(mesh);
     }
 }

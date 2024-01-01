@@ -1,3 +1,3 @@
-import {main} from "./platformer";
+import {main} from "./platformer/platformer";
 
 main();
