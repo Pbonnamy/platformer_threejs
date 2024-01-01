@@ -5,7 +5,7 @@ window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('keydown', onKeyDown, false);
 
 const INITIAL_JUMP_STRENGHT = 0.3;
-const PLATFORM_SIZE = 5;
+const PLATFORM_SIZE = 6;
 const CUBE_SPEED = 0.5;
 
 let cube, plane;
@@ -17,24 +17,24 @@ let gravityStrength = 0.02;
 
 const platforms = [
     {
-        height: 1,
         x: 0,
         z: -PLATFORM_SIZE,
+        y: -PLATFORM_SIZE/2 + 1,
     },
     {
-        height: 2,
         x: PLATFORM_SIZE,
-        z: -PLATFORM_SIZE
+        z: -PLATFORM_SIZE,
+        y: -PLATFORM_SIZE/2 + 2,
     },
     {
-        height: 3,
         x: PLATFORM_SIZE,
         z: -PLATFORM_SIZE * 2,
+        y: -PLATFORM_SIZE/2 + 3,
     },
     {
-        height: 4,
         x: 0,
         z: -PLATFORM_SIZE * 2,
+        y: -PLATFORM_SIZE/2 + 4,
     }
 ];
 
@@ -93,7 +93,10 @@ function createCube() {
 function createPlane() {
     const geometry = new THREE.PlaneGeometry(30, 30);
     const texture = new THREE.TextureLoader().load('src/assets/water.jpg');
-    const material = new THREE.MeshBasicMaterial({
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(5, 5);
+    const material = new THREE.MeshPhongMaterial({
         map: texture,
         side: THREE.DoubleSide,
     });
@@ -163,19 +166,29 @@ function addLight() {
     ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    pointLight = new THREE.PointLight(0xffffff, 10);
+    pointLight = new THREE.PointLight(0xffffff, 100);
     scene.add(pointLight);
-    pointLight.position.set(1, 3, 0);
+    pointLight.position.set(5, 10, 0);
     pointLight.castShadow = true;
 }
 
 function createPlatforms() {
     for (const platform of platforms) {
-        const geometry = new THREE.BoxGeometry(PLATFORM_SIZE, platform.height, PLATFORM_SIZE);
-        const material = new THREE.MeshPhongMaterial({color: 0xff0000});
+        const geometry = new THREE.BoxGeometry(PLATFORM_SIZE, PLATFORM_SIZE, PLATFORM_SIZE);
+        const topTexture = new THREE.TextureLoader().load('src/assets/top.png');
+        const sideTexture = new THREE.TextureLoader().load('src/assets/side.png');
+
+        const material = [
+            new THREE.MeshPhongMaterial({map: sideTexture}),
+            new THREE.MeshPhongMaterial({map: sideTexture}),
+            new THREE.MeshPhongMaterial({map: topTexture}),
+            new THREE.MeshPhongMaterial({map: topTexture}),
+            new THREE.MeshPhongMaterial({map: sideTexture}),
+            new THREE.MeshPhongMaterial({map: sideTexture}),
+        ]
         const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.x = platform.x
-        mesh.position.y = platform.height / 2;
+        mesh.position.x = platform.x;
+        mesh.position.y = platform.y;
         mesh.position.z = platform.z;
         mesh.castShadow = true;
         platform.object = mesh;
