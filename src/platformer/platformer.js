@@ -128,22 +128,24 @@ function createPlane() {
 }
 
 function onKeyDown(event) {
-    checkPlayerCollision();
+
+    let nextPosition = Object.assign({}, player.position);
+
     switch (event.key) {
         case 'z':
-            player.position.z -= PLAYER_SPEED;
+            nextPosition.z -= PLAYER_SPEED;
             player.rotation.y = Math.PI;
             break;
         case 's':
-            player.position.z += PLAYER_SPEED;
+            nextPosition.z += PLAYER_SPEED;
             player.rotation.y = 0;
             break;
         case 'q':
-            player.position.x -= PLAYER_SPEED;
+            nextPosition.x -= PLAYER_SPEED;
             player.rotation.y = -Math.PI / 2;
             break;
         case 'd':
-            player.position.x += PLAYER_SPEED;
+            nextPosition.x += PLAYER_SPEED;
             player.rotation.y = Math.PI / 2;
             break;
         case ' ':
@@ -154,25 +156,30 @@ function onKeyDown(event) {
             break;
     }
 
-    checkPlayerCollision();
+    if (canMove(nextPosition)) {
+        player.position.x = nextPosition.x;
+        player.position.z = nextPosition.z;
+    }
 }
 
 export function onEventReceived(event, intensity) {
+    let nextPosition = Object.assign({}, player.position);
+
     switch (event) {
         case 'push':
-            player.position.z -= intensity;
+            nextPosition.z -= intensity;
             player.rotation.y = Math.PI;
             break;
         case 'pull':
-            player.position.z += intensity;
+            nextPosition.z += intensity;
             player.rotation.y = 0;
             break;
         case 'left':
-            player.position.x -= intensity;
+            nextPosition.x -= intensity;
             player.rotation.y = -Math.PI / 2;
             break;
         case 'right':
-            player.position.x += intensity;
+            nextPosition.x += intensity;
             player.rotation.y = Math.PI / 2;
             break;
         case 'lift':
@@ -183,7 +190,10 @@ export function onEventReceived(event, intensity) {
             break;
     }
 
-    checkPlayerCollision();
+    if (canMove(nextPosition)) {
+        player.position.x = nextPosition.x;
+        player.position.z = nextPosition.z;
+    }
 }
 
 function playerJump() {
@@ -275,16 +285,30 @@ function createTorches() {
     });
 }
 
-function checkPlayerCollision() {
+function canMove(nextPosition) {
     for (const platform of platforms) {
-        if (player.position.x >= platform.x - PLATFORM_SIZE / 2
-            && player.position.x <= platform.x + PLATFORM_SIZE / 2
-            && player.position.z >= platform.z - PLATFORM_SIZE / 2
-            && player.position.z <= platform.z + PLATFORM_SIZE / 2) {
-            player.position.y = platform.y + PLATFORM_SIZE / 2 + INITIAL_PLAYER_Y;
-            return;
+        if (nextPosition.x >= platform.x - PLATFORM_SIZE / 2
+            && nextPosition.x <= platform.x + PLATFORM_SIZE / 2
+            && nextPosition.z >= platform.z - PLATFORM_SIZE / 2
+            && nextPosition.z <= platform.z + PLATFORM_SIZE / 2) {
+            //is on platform
+            if (Math.round(player.position.y - INITIAL_PLAYER_Y) < platform.y + PLATFORM_SIZE / 2) {
+                console.log(player.position.y - INITIAL_PLAYER_Y, platform.y + PLATFORM_SIZE / 2);
+                //is under platform
+                return false;
+            } else {
+                //is on platform
+                if (isJumping) {
+                    yBeforeJumping = platform.y + PLATFORM_SIZE / 2 + INITIAL_PLAYER_Y;
+                } else {
+                    player.position.y = platform.y + PLATFORM_SIZE / 2 + INITIAL_PLAYER_Y;
+                }
+                return true;
+            }
         }
     }
 
     player.position.y = INITIAL_PLAYER_Y;
+
+    return true;
 }
