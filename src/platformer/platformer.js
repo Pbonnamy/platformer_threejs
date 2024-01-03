@@ -293,7 +293,6 @@ function canMove(nextPosition) {
             && nextPosition.z <= platform.z + PLATFORM_SIZE / 2) {
             //is on platform
             if (Math.round(player.position.y - INITIAL_PLAYER_Y) < platform.y + PLATFORM_SIZE / 2) {
-                console.log(player.position.y - INITIAL_PLAYER_Y, platform.y + PLATFORM_SIZE / 2);
                 //is under platform
                 return false;
             } else {
@@ -308,7 +307,10 @@ function canMove(nextPosition) {
         }
     }
 
+    //is not on platform
     player.position.y = INITIAL_PLAYER_Y;
 
-    return true;
+    //check if out of bounds
+    return !(nextPosition.x > PLANE_SIZE / 2 || nextPosition.x < -PLANE_SIZE / 2
+        || nextPosition.z > PLANE_SIZE / 2 || nextPosition.z < -PLANE_SIZE / 2);
 }
