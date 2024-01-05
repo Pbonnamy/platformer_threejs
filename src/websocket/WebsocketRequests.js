@@ -37,3 +37,16 @@ export const createSession = (token, headset) => {
         }
     }
 }
+
+export const subscribe = (token, session, streams) => {
+    return {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "subscribe",
+        "params": {
+            "cortexToken": token,
+            "session": session,
+            "streams": streams
+        }
+    }
+}

@@ -1,4 +1,4 @@
-import {authorize, createSession, queryHeadsets, requestAccess} from "./WebsocketRequests";
+import {authorize, createSession, queryHeadsets, requestAccess, subscribe} from "./WebsocketRequests";
 
 export class WebsocketClient {
     constructor() {
@@ -48,5 +48,19 @@ export class WebsocketClient {
 
         const resSession = await this.send(createSession(this.token, this.headSet));
         this.session = resSession.result.id;
+
+        await this.send(subscribe(this.token, this.session, ['com']));
+        this.handleSubscribedData();
+    }
+
+    handleSubscribedData() {
+        this.socket.onmessage = (event) => {
+            const command = JSON.parse(event.data);
+            console.log('websocket message: ', command);
+            if (command.com) {
+                const commandName = command.com[0];
+                const intensity = command.com[1];
+            }
+        }
     }
 }
