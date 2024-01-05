@@ -1,3 +1,5 @@
+import {authorize, requestAccess} from "./WebsocketRequests";
+
 export class WebsocketClient {
     constructor() {
         this.socket = null;
@@ -12,6 +14,11 @@ export class WebsocketClient {
 
         this.socket.onopen = async () => {
             console.log("websocket connected")
+
+            await this.send(requestAccess);
+
+            const resToken = await this.send(authorize);
+            this.token = resToken.result.cortexToken;
         }
 
         this.socket.onclose = () => {
@@ -21,5 +28,15 @@ export class WebsocketClient {
         this.socket.onerror = (event) => {
             console.log("websocket error :", event)
         }
+    }
+
+    async send(message) {
+        return new Promise((resolve, reject) => {
+            this.socket.send(JSON.stringify(message));
+            this.socket.onmessage = (event) => {
+                console.log('websocket message: ', event.data);
+                resolve(JSON.parse(event.data));
+            }
+        })
     }
 }
