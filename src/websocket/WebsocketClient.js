@@ -1,4 +1,4 @@
-import {authorize, requestAccess} from "./WebsocketRequests";
+import {authorize, createSession, queryHeadsets, requestAccess} from "./WebsocketRequests";
 
 export class WebsocketClient {
     constructor() {
@@ -19,6 +19,8 @@ export class WebsocketClient {
 
             const resToken = await this.send(authorize);
             this.token = resToken.result.cortexToken;
+
+            await this.retrieveMentalCommand();
         }
 
         this.socket.onclose = () => {
@@ -38,5 +40,13 @@ export class WebsocketClient {
                 resolve(JSON.parse(event.data));
             }
         })
+    }
+
+    async retrieveMentalCommand() {
+        const resHeadset = await this.send(queryHeadsets);
+        this.headSet = resHeadset.result[0].id;
+
+        const resSession = await this.send(createSession(this.token, this.headSet));
+        this.session = resSession.result.id;
     }
 }

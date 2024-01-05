@@ -18,3 +18,22 @@ export const authorize = {
         "clientSecret": import.meta.env.VITE_CLIENT_SECRET,
     }
 }
+
+export const queryHeadsets = {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "queryHeadsets"
+}
+
+export const createSession = (token, headset) => {
+    return {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "createSession",
+        "params": {
+            "cortexToken": token,
+            "headset": headset,
+            "status": "open"
+        }
+    }
+}
