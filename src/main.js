@@ -3,4 +3,4 @@ import {WebsocketClient} from "./websocket/WebsocketClient";
 
 main();
 
-//new WebsocketClient();
+new WebsocketClient();
