@@ -23,24 +23,24 @@ let gravityStrength = 0.02;
 
 const platforms = [
     {
-        x: -PLATFORM_SIZE/2,
-        z: PLATFORM_SIZE/2,
-        y: -PLATFORM_SIZE/2 + 1,
+        x: -PLATFORM_SIZE / 2,
+        z: PLATFORM_SIZE / 2,
+        y: -PLATFORM_SIZE / 2 + 1,
     },
     {
-        x: PLATFORM_SIZE/2,
-        z: PLATFORM_SIZE/2,
-        y: -PLATFORM_SIZE/2 + 2,
+        x: PLATFORM_SIZE / 2,
+        z: PLATFORM_SIZE / 2,
+        y: -PLATFORM_SIZE / 2 + 2,
     },
     {
-        x: PLATFORM_SIZE/2,
-        z: -PLATFORM_SIZE/2,
-        y: -PLATFORM_SIZE/2 + 3,
+        x: PLATFORM_SIZE / 2,
+        z: -PLATFORM_SIZE / 2,
+        y: -PLATFORM_SIZE / 2 + 3,
     },
     {
-        x: -PLATFORM_SIZE/2,
-        z: -PLATFORM_SIZE/2,
-        y: -PLATFORM_SIZE/2 + 4,
+        x: -PLATFORM_SIZE / 2,
+        z: -PLATFORM_SIZE / 2,
+        y: -PLATFORM_SIZE / 2 + 4,
     }
 ];
 
@@ -253,8 +253,8 @@ function createTrees() {
         });
 
         tree.position.y = -1;
-        tree.position.x = -PLATFORM_SIZE/2-1;
-        tree.position.z = -PLATFORM_SIZE/2;
+        tree.position.x = -PLATFORM_SIZE / 2 - 1;
+        tree.position.z = -PLATFORM_SIZE / 2;
         tree.rotation.y = Math.PI / 2;
         tree.scale.set(10, 10, 10);
 
@@ -275,8 +275,8 @@ function createTorches() {
         });
 
         torch.position.y = 2.5;
-        torch.position.x = PLATFORM_SIZE/2+2;
-        torch.position.z = PLATFORM_SIZE/2+2;
+        torch.position.x = PLATFORM_SIZE / 2 + 2;
+        torch.position.z = PLATFORM_SIZE / 2 + 2;
         torch.rotation.y = Math.PI / 2;
 
         scene.add(torch);
