@@ -13,27 +13,53 @@ const PLAYER_SPEED = 0.5;
 const PLANE_SIZE = 50;
 const INITIAL_PLAYER_Y = 1.6;
 const PLATFORMS = [
+    //bottom left
     {
         x: -PLATFORM_SIZE / 2,
         z: PLATFORM_SIZE / 2,
         y: -PLATFORM_SIZE / 2 + 1,
     },
+    //bottom right
     {
         x: PLATFORM_SIZE / 2,
         z: PLATFORM_SIZE / 2,
         y: -PLATFORM_SIZE / 2 + 2,
     },
+    //top left
     {
         x: PLATFORM_SIZE / 2,
         z: -PLATFORM_SIZE / 2,
         y: -PLATFORM_SIZE / 2 + 3,
     },
+    //top right
     {
         x: -PLATFORM_SIZE / 2,
         z: -PLATFORM_SIZE / 2,
         y: -PLATFORM_SIZE / 2 + 4,
     }
 ];
+
+const TORCHES = [
+    //bottom left
+    {
+        x: -PLATFORM_SIZE / 2 - 2,
+        z: PLATFORM_SIZE / 2 + 2,
+        y: 1.5,
+    },
+    //bottom right
+    {
+        x: PLATFORM_SIZE / 2 + 2,
+        z: PLATFORM_SIZE / 2 + 2,
+        y: 2.5,
+    },
+    //top right
+    {
+        x: PLATFORM_SIZE / 2 + 2,
+        z: -PLATFORM_SIZE / 2 - 2,
+        y: 3.5,
+    },
+];
+
 
 //3D models loader
 const modelLoader = new GLTFLoader();
@@ -75,7 +101,10 @@ function onWindowResize() {
 function init() {
     //scene
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87ceeb);
+
+    //scene background image
+    scene.background = new THREE.TextureLoader().load('src/assets/texture/night.png');
+    scene.backgroundIntensity = 0.5;
 
     //render
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -85,7 +114,7 @@ function init() {
 
     //camera
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 15;
+    camera.position.z = 20;
     camera.position.y = 10;
 
     //camera controls
@@ -270,14 +299,8 @@ function playerJump() {
 //add light to the scene
 function addLights() {
     //ambient light
-    ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
-
-    //point light
-    pointLight = new THREE.PointLight(0xffffff, 500);
-    scene.add(pointLight);
-    pointLight.position.set(5, 20, 0);
-    pointLight.castShadow = true;
 }
 
 //create platforms and add them to the scene
@@ -348,28 +371,34 @@ function createTree() {
 
 //create torch and add it to the scene
 function createTorch() {
-    modelLoader.load('src/assets/model/torch.glb', function (gltf) {
-        const torch = gltf.scene;
+    for (const torchPosition of TORCHES) {
+        modelLoader.load('src/assets/model/torch.glb', function (gltf) {
+            const torch = gltf.scene;
 
-        //handle shadows
-        torch.traverse(function (child) {
-            if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }
+            //handle shadows
+            torch.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+
+            //torch position & rotation
+            torch.position.y = torchPosition.y;
+            torch.position.x = torchPosition.x;
+            torch.position.z = torchPosition.z;
+
+            //add torch to the scene
+            scene.add(torch);
+        }, undefined, function (error) {
+            console.error(error);
         });
 
-        //torch position & rotation
-        torch.position.y = 2.5;
-        torch.position.x = PLATFORM_SIZE / 2 + 2;
-        torch.position.z = PLATFORM_SIZE / 2 + 2;
-        torch.rotation.y = Math.PI / 2;
-
-        //add torch to the scene
-        scene.add(torch);
-    }, undefined, function (error) {
-        console.error(error);
-    });
+        const torchLight = new THREE.PointLight(0xffffffdddd, 50);
+        torchLight.position.set(torchPosition.x, torchPosition.y + 3, torchPosition.z);
+        torchLight.castShadow = true;
+        scene.add(torchLight);
+    }
 }
 
 //check if player can move to next position
