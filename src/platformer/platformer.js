@@ -162,6 +162,12 @@ function createPlane() {
 //when keyboard key is pressed
 function onKeyDown(event) {
 
+    //check if key is allowed
+    const allowedKeys = ['z', 's', 'q', 'd', ' '];
+    if (!allowedKeys.includes(event.key)) {
+        return;
+    }
+
     let nextPosition = Object.assign({}, player.position);
 
     switch (event.key) {
@@ -203,6 +209,13 @@ function onKeyDown(event) {
 
 //when mental command is received
 export function onEventReceived(event, intensity) {
+
+    //check if event is allowed
+    const allowedEvents = ['push', 'pull', 'left', 'right', 'lift'];
+    if (!allowedEvents.includes(event)) {
+        return;
+    }
+
     let nextPosition = Object.assign({}, player.position);
 
     switch (event) {
