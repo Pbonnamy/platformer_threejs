@@ -426,7 +426,9 @@ function canMove(nextPosition) {
     }
 
     //player is not on platform
-    player.position.y = INITIAL_PLAYER_Y;
+    if (!isJumping) {
+        player.position.y = INITIAL_PLAYER_Y;
+    }
 
     //check if player is out of the plane
     return !(nextPosition.x > PLANE_SIZE / 2 || nextPosition.x < -PLANE_SIZE / 2
